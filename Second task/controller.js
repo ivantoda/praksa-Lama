@@ -1,9 +1,4 @@
-const express = require('express');
-const controller = express();
 const fs = require('fs');
-const bodyParser = require('body-parser');
-
-controller.use(bodyParser.json());
 
 function getDATA() {
     const data = JSON.parse(fs.readFileSync('data.json'));

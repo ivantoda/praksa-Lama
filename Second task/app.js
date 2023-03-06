@@ -9,20 +9,20 @@ const PORT = 3000;
 
 app.use(bodyParser.json());
 
-app.get('/users/:id', (req, res) => {
-  const userId = parseInt(req.params.id);
+app.get('/users', (req, res) => {
+  const userId = parseInt(req.query.id);
   const user = getUserById(userId);
 
   if (user) {
     res.json(user);
-  } else {
+ } else {
     res.status(404).json({ error: `User with ID ${userId} not found` });
   }
 });
 
 
-app.get('/posts/:id', (req, res) => {
-  const postId = parseInt(req.params.id);
+app.get('/posts', (req, res) => {
+  const postId = parseInt(req.query.id);
   const post = getPostById(postId);
 
   if (post){
@@ -30,13 +30,11 @@ app.get('/posts/:id', (req, res) => {
   } else {
     res.status(404).json({error: `Post with ID ${postId} not found` });
   }
-})
+});
 
-app.get('/postsDate/:bothDates', (req, res) => {
-  const string = req.params.bothDates;
-  var dates = string.split(",")
-  const startDate = new Date(dates[0]);
-  const endDate = new Date(dates[1]);
+app.get('/postsDate', (req, res) => {
+  const startDate = new Date(req.query.startDate);
+  const endDate = new Date(req.query.endDate);
   const posts = getPostsByDateRange(startDate, endDate);
   res.json(posts);
 });
