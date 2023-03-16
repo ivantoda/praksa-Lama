@@ -1,15 +1,27 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const {getDATA, getUserById, getPostById, getPostsByDateRange } = require('./controller');
+const cors = require('cors');
+const {getDATA, getAllUsers, getAllPosts, getUserById, getPostById, getPostsByUserId, getPostsByDateRange } = require('./controller');
 
 const app = express();
 const PORT = 3000;
 
-
+app.use(cors({
+  origin: ['http://localhost:4200']
+}));
 app.use(bodyParser.json());
 
-app.get('/users', (req, res) => {
+app.get('/users', (req,res) => {
+  const users = getAllUsers();
+  if (users) {
+    res.json(users);
+ } else {
+    res.status(404).json({ error: `Users not found` });
+  }
+});
+
+app.get('/user', (req, res) => {
   const userId = parseInt(req.query.id);
   const user = getUserById(userId);
 
@@ -20,8 +32,16 @@ app.get('/users', (req, res) => {
   }
 });
 
+app.get('/posts', (req,res) => {
+  const posts = getAllPosts();
+  if (posts) {
+    res.json(posts);
+ } else {
+    res.status(404).json({ error: `Posts not found` });
+  } 
+});
 
-app.get('/posts', (req, res) => {
+app.get('/post', (req, res) => {
   const postId = parseInt(req.query.id);
   const post = getPostById(postId);
 
@@ -29,6 +49,17 @@ app.get('/posts', (req, res) => {
     res.json(post);
   } else {
     res.status(404).json({error: `Post with ID ${postId} not found` });
+  }
+});
+
+app.get('/postByUser', (req, res) => {
+  const userId = parseInt(req.query.userId);
+  const post = getPostsByUserId(userId);
+  if(post){
+    res.json(post);
+  }
+  else {
+    res.status(404).json({error: `Posts with ID ${userId} not found` });
   }
 });
 
@@ -52,6 +83,19 @@ app.post('/userEmail/:userId/email', (req, res) => {
   }
 });
 
+app.put('/addUser', (req, res) => {
+  const data = getDATA();
+  const newUser = {
+    id: data.users.length + 1,
+    name: req.query.name,
+    email: req.query.email
+  };
+  data.users.push(newUser);
+  fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
+  res.json(newUser);
+});
+
+
 app.put('/addPost', (req, res) => {
   const data = getDATA();
   const UID = parseInt(req.body.user_id);
@@ -69,6 +113,21 @@ app.put('/addPost', (req, res) => {
   data.posts.push(newPost);
   fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
   res.json(newPost);
+});
+
+app.put('/editUser/:userId', (req, res) => {
+  const data = getDATA();
+  const userId = parseInt(req.params.userId);
+  const user = data.users.find(user => user.id === userId);
+  if (user) {
+    const { name, email } = req.body;
+    user.name = name || user.name;
+    user.email = email || user.email;
+    fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
+    res.status(200).json({ message: 'User data updated' });
+  } else {
+    res.status(404).send('User not found');
+  }
 });
 
 app.listen(PORT, () => {

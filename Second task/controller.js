@@ -4,7 +4,19 @@ function getDATA() {
     const data = JSON.parse(fs.readFileSync('data.json'));
     return data;
   }
-  
+
+function getAllUsers(){
+  const data = getDATA();
+  const users = data.users;
+  return users;
+}
+
+function getAllPosts(){
+  const data = getDATA();
+  const posts = data.posts;
+  return posts;
+}
+
 function getUserById(userId) {
     const data = getDATA();
     const users = data.users;
@@ -15,6 +27,11 @@ function getPostById(postId) {
     const posts = data.posts;
     return posts.find(post => post.id === postId);
   }
+function getPostsByUserId(userId){
+  const data = getDATA();
+  const posts = data.posts;
+  return posts.filter(post => post.user_id === userId);
+}
 function getPostsByDateRange(startDate, endDate) {
     const data = getDATA();
     const posts = data.posts;
@@ -24,9 +41,13 @@ function getPostsByDateRange(startDate, endDate) {
     });
   }
 
+
   module.exports = {
     getDATA,
+    getAllUsers,
+    getAllPosts,
     getUserById,
     getPostById,
+    getPostsByUserId,
     getPostsByDateRange
   };
